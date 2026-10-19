@@ -1,9 +1,8 @@
-
 name: Build VietLinh Font Viewer APK
 
 on:
   push:
-    branches: [main, master]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -11,26 +10,24 @@ permissions:
 
 jobs:
   build-apk:
-    runs-on: ubuntu-latest
-
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
 
       - name: Setup Java 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
 
-
-- name: Setup Android SDK
-  uses: android-actions/setup-android@v4
-  with:
-    packages: 'platform-tools'
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: 'platform-tools'
 
       - name: Install Android SDK 34
-        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
+        run: sdkmanager 'platforms;android-34' 'build-tools;34.0.0'
 
       - name: Setup Gradle 8.4
         uses: gradle/actions/setup-gradle@v4
