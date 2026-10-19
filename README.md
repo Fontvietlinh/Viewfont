@@ -1,46 +1,27 @@
-# VietLinh Font Viewer - Android project ready for GitHub Actions
+# VietLinh Font Viewer 2.0 — Android / GitHub Actions
 
-Ung dung Android de xem font OTF/TTF, nhap van ban tieng Viet de xem truoc, thay doi co chu va xem bo ky tu co dau.
+Ứng dụng kiểm tra font TTF/OTF, có tab xem nội dung và tab **Glyph / Unicode**.
 
-## Cach tao APK tren GitHub (khong can cai Android Studio)
+## Chức năng
+- **XEM CHỮ**: mở font, gõ nội dung tiếng Việt, chỉnh cỡ chữ.
+- **GLYPH / UNICODE**: bảng các codepoint được font ánh xạ thật trong `cmap`, hiện mã `U+XXXX`, tìm kiếm, lọc Tiếng Việt/Latin/Số & dấu, nhấn để xem to, xem GID và sao chép ký tự.
+- Hiển thị `maxp.numGlyphs` (tổng glyph trong font) riêng với số mã Unicode đã ánh xạ.
+- Giao diện sáng, gọn, dùng offline, không yêu cầu cấp quyền đọc toàn bộ bộ nhớ máy.
 
-1. Giai nen file `VietLinhFontViewer_GitHub_READY.zip` tren may Mac.
-2. Mo kho GitHub **https://github.com/Fontvietlinh/Viewfont**.
-3. Bam **uploading an existing file** (neu kho con rong) hoac **Add file > Upload files**.
-4. Mo thu muc da giai nen. **Can tai cac tep va thu muc BEN TRONG**, khong tai nguyen file zip va khong tai thu muc me lam mot cap thu muc long nhau.
-5. Vi `.github` la thu muc an tren macOS, trong Finder nhan **Command + Shift + .** de hien thi truoc khi chon tat ca tep.
-6. Keo tha tat ca thanh phan goc vao trang Upload files: `.github`, `app`, `build.gradle.kts`, `settings.gradle.kts`, `gradle.properties`, `README.md`, `.gitignore`.
-7. O cuoi trang, bam **Commit changes** de tai file len nhanh `main`.
-8. Chon tab **Actions**. Workflow **Build VietLinh Font Viewer APK** se duoc kich hoat khi push len `main`; hoac chon ten workflow > **Run workflow > Run workflow**.
-9. Khi workflow hien dau tick mau xanh, mo trang lan chay, tim muc **Artifacts** > **VietLinhFontViewer-APK**.
-10. Tai tep zip artifact ve, giai nen lay **app-debug.apk** de chuyen sang Android va cai.
+## Giới hạn của bản này
+- Lưới v2 chỉ hiển thị **glyph có Unicode trong cmap**. Glyph ALT, LIGA, swash không có codepoint không thể hiển thị bằng TextView thông thường; chúng vẫn nằm trong tổng số glyph `maxp`. Về sau có thể thêm trình xem Glyph ID độc lập và kiểm tra GSUB.
+- Mở file TTF/OTF đơn lẻ; chưa hỗ trợ TTC/OTC, WOFF/WOFF2 và font biến thể nhiều trục.
+- Cmap hỗ trợ định dạng 0, 4, 12. Lưới được giới hạn tối đa 130.000 ánh xạ để tránh quá tải điện thoại.
+- Kiểm tra render ở Android không thay thế kiểm tra contour/font features trong FontLab.
 
-**Chu y:** Android cho phep cai `app-debug.apk` ma khong can Play Store; neu dien thoai can, cap quyen *Allow from this source* cho ung dung quan ly tep. Day la ban debug danh cho thu nghiem, khong phai ban release da ky bang khoa rieng de dang Play Store.
+## Cập nhật repository GitHub
 
-## Cau truc GitHub dung
+1. Giải nén **VietLinhFontViewer_v2_GitHub.zip** trên Mac.
+2. Mở repository **Fontvietlinh/Viewfont**, chọn **Code → Add file → Upload files**.
+3. Tải **nội dung bên trong thư mục đã giải nén** (gồm `app`, `.github` và các file Gradle) vào gốc repository, chọn ghi đè các file cũ.
+4. Commit vào nhánh `main` → tab **Actions** → chờ **Build VietLinh Font Viewer APK** thành công → tải artifact `VietLinhFontViewer-APK`.
+5. Nếu Android báo không thể cập nhật vì chữ ký debug khác nhau, gỡ bản debug cũ trước khi cài bản mới.
 
-```
-Viewfont/
-  .github/workflows/build-apk.yml
-  app/build.gradle.kts
-  app/src/main/AndroidManifest.xml
-  app/src/main/java/com/fontvietlinh/viewer/MainActivity.java
-  app/src/main/res/... (layout, values, mipmap launcher)
-  build.gradle.kts
-  settings.gradle.kts
-  gradle.properties
-  README.md
-```
+Workflow dùng `android-actions/setup-android@v4`, Ubuntu 24.04, Gradle 8.4 và Java 17, không cần Android Studio trên Mac.
 
-## Ghi chu build
-
-- GitHub Actions su dung JDK 17, Android SDK 34 va Gradle 8.4, khong can Gradle Wrapper.
-- Android Gradle Plugin 8.3.0; minSdk 24; targetSdk 34.
-- Lenh build: `gradle --no-daemon :app:assembleDebug --stacktrace`.
-- Dau ra: `app/build/outputs/apk/debug/app-debug.apk`.
-- Moi lan push ma nguon len nhanh `main` hoac `master` se build lai.
-- Neu Actions bi vo hieu hoa, vao repository **Settings > Actions > General** de bat Actions cho repo.
-
-## Luu y ve kha nang kiem thu
-
-Du an da duoc sua cac tai nguyen bi thieu va cau hinh build tren GitHub, nhung chua chay bien dich tren may cuc bo vi khong co Android SDK/Gradle tai moi truong chuan bi file. Hay su dung Actions de xac nhan build thuc te.
+Build task: `gradle :app:assembleDebug`. Package debug: `com.fontvietlinh.viewer.debug`.

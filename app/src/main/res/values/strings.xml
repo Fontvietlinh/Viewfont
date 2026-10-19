@@ -1,11 +1,4 @@
 <resources>
     <string name="app_name">VietLinh Font Viewer</string>
-    <string name="title_font_preview">Xem trước Font Tiếng Việt</string>
-    <string name="sample_vietnamese_text">Con cò bay lả bay la, bay từ cửa phủ bay ra cánh đồng. Vừa rồi tôi thấy người thợ may mặc áo gấm thêu hoa.</string>
-    <string name="sample_pangram">Do bạch kim rất quý nên cả giang sơn phồn thịnh tranh giành.</string>
-    <string name="btn_choose_font">Chọn File Font (.ttf, .otf)</string>
-    <string name="label_font_size">Kích thước chữ: %1$d sp</string>
-    <string name="label_characters">Bảng chữ cái Tiếng Việt</string>
-    <string name="hint_input_text">Nhập nội dung cần thử nghiệm font…</string>
-    <string name="default_font_name">Mặc định hệ thống</string>
+    <string name="sample_vietnamese_text">Việt Linh — Chữ đẹp cho mọi thiết kế.\nĐ Ắ Ằ Ẳ Ẵ Ặ, Ơ Ớ Ờ Ở Ỡ Ợ, Ư Ứ Ừ Ử Ữ Ự.</string>
 </resources>
