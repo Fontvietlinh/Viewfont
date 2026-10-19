@@ -23,7 +23,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.chip.ChipGroup;
@@ -51,6 +50,19 @@ public class MainActivity extends AppCompatActivity {
     private final ExecutorService reader = Executors.newSingleThreadExecutor();
     private String category = "all";
     private boolean loading = false;
+    private PinchZoomRecyclerView glyphGrid;
+    private GridLayoutManager glyphManager;
+    private Slider sizeSlider;
+    private TextView tvGlyphZoomLabel;
+    private float previewSizeSp = 30f;
+    private float tileTargetDp = 78f;
+    private boolean gridZoomScheduled = false;
+    private static final float MIN_PREVIEW_SP = 12f;
+    private static final float MAX_PREVIEW_SP = 160f;
+    private static final float MIN_TILE_DP = 48f;
+    private static final float MAX_TILE_DP = 230f;
+    private static final String ENGLISH_DEMO = "Every letter tells a story.\nThe quick brown fox jumps over the lazy dog.";
+    private static final String VIETNAMESE_NO_ACCENTS_DEMO = "Me ngoi nguyen cau hang bao dem, loi kinh vong xa that em dem";
 
     private static final String VIETNAMESE =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
@@ -83,12 +95,27 @@ public class MainActivity extends AppCompatActivity {
         glyphPage = findViewById(R.id.glyphPage);
         tabLayout = findViewById(R.id.tabLayout);
 
-        RecyclerView grid = findViewById(R.id.glyphGrid);
-        int span = getResources().getConfiguration().screenWidthDp >= 420 ? 5 : 4;
-        grid.setLayoutManager(new GridLayoutManager(this, span));
-        grid.setHasFixedSize(true);
+        glyphGrid = findViewById(R.id.glyphGrid);
+        glyphManager = new GridLayoutManager(this, 4);
+        glyphGrid.setLayoutManager(glyphManager);
+        glyphGrid.setHasFixedSize(false);
         glyphAdapter = new GlyphAdapter(this, this::showGlyphDetails);
-        grid.setAdapter(glyphAdapter);
+        glyphGrid.setAdapter(glyphAdapter);
+        tvGlyphZoomLabel = findViewById(R.id.tvGlyphZoomLabel);
+        glyphGrid.setZoomListener(scaleFactor -> {
+            tileTargetDp = clamp(tileTargetDp * scaleFactor, MIN_TILE_DP, MAX_TILE_DP);
+            scheduleGridZoom();
+        });
+        glyphGrid.addOnLayoutChangeListener((view, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+            if (right - left != oldRight - oldLeft) scheduleGridZoom();
+        });
+        scheduleGridZoom();
+        PinchZoomNestedScrollView previewScroll = findViewById(R.id.previewPage);
+        previewScroll.setZoomListener(scaleFactor -> {
+            previewSizeSp = clamp(previewSizeSp * scaleFactor, MIN_PREVIEW_SP, MAX_PREVIEW_SP);
+            float rounded = Math.round(previewSizeSp);
+            if (sizeSlider.getValue() != rounded) sizeSlider.setValue(rounded);
+        });
 
         btnPickFont.setOnClickListener(v -> pickFont.launch(new String[]{"*/*"}));
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -101,15 +128,22 @@ public class MainActivity extends AppCompatActivity {
             @Override public void onTabReselected(TabLayout.Tab tab) {}
         });
 
-        Slider sizeSlider = findViewById(R.id.sliderFontSize);
+        sizeSlider = findViewById(R.id.sliderFontSize);
         sizeSlider.addOnChangeListener((slider, value, fromUser) -> {
-            tvFontSizeLabel.setText(String.format(Locale.US,"Cỡ chữ  %d sp",Math.round(value)));
+            if (fromUser) previewSizeSp = value;
+            tvFontSizeLabel.setText(String.format(Locale.US,"Cỡ chữ %d sp · zoom 2 ngón", Math.round(value)));
             tvPreview.setTextSize(value);
         });
-        etCustomText.addTextChangedListener(simpleWatcher(() -> {
-            String input = etCustomText.getText().toString();
-            tvPreview.setText(input.isEmpty() ? getString(R.string.sample_vietnamese_text) : input);
-        }));
+        tvPreview.setText(ENGLISH_DEMO);
+        etCustomText.setText(ENGLISH_DEMO);
+        ChipGroup demos = findViewById(R.id.demoChips);
+        demos.setOnCheckedStateChangeListener((group, checkedIds) -> {
+            int id = checkedIds.isEmpty() ? R.id.chipDemoEnglish : checkedIds.get(0);
+            etCustomText.setText(id == R.id.chipDemoVietnamesePlain ? VIETNAMESE_NO_ACCENTS_DEMO : ENGLISH_DEMO);
+            etCustomText.setSelection(etCustomText.length());
+        });
+        etCustomText.addTextChangedListener(simpleWatcher(() ->
+                tvPreview.setText(etCustomText.getText().toString())));
         etGlyphSearch.addTextChangedListener(simpleWatcher(this::filterGlyphs));
         ChipGroup chips = findViewById(R.id.glyphChips);
         chips.setOnCheckedStateChangeListener((group, checkedIds) -> {
@@ -120,6 +154,35 @@ public class MainActivity extends AppCompatActivity {
             else category = "all";
             filterGlyphs();
         });
+    }
+
+    private static float clamp(float value, float min, float max) {
+        return Math.max(min, Math.min(max, value));
+    }
+
+    /** Coalesce repeated pinch updates to one responsive grid relayout per frame. */
+    private void scheduleGridZoom() {
+        if (gridZoomScheduled || glyphGrid == null) return;
+        gridZoomScheduled = true;
+        glyphGrid.postOnAnimation(() -> {
+            gridZoomScheduled = false;
+            applyGridZoom();
+        });
+    }
+
+    /** Adapt number of columns and glyph size together; size survives category changes. */
+    private void applyGridZoom() {
+        if (glyphGrid == null || glyphGrid.getWidth() <= 0) return;
+        float density = getResources().getDisplayMetrics().density;
+        float widthDp = (glyphGrid.getWidth() - glyphGrid.getPaddingLeft()
+                - glyphGrid.getPaddingRight()) / density;
+        if (widthDp <= 0) return;
+        int span = Math.max(1, Math.min(12, (int) Math.floor(widthDp / (tileTargetDp + 6f))));
+        int actualCellDp = Math.max(40, (int) Math.floor(widthDp / span) - 6);
+        if (glyphManager.getSpanCount() != span) glyphManager.setSpanCount(span);
+        glyphAdapter.setCellWidthDp(actualCellDp);
+        tvGlyphZoomLabel.setText(String.format(Locale.US,
+                "Lưới %d cột · ô %d dp · zoom bằng 2 ngón", span, actualCellDp));
     }
 
     private TextWatcher simpleWatcher(Runnable runnable) {

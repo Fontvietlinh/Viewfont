@@ -28,7 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="1dp"
-            android:text="Font Viewer 2.0"
+            android:text="Font Viewer 2.1"
             android:textSize="12sp"
             android:textColor="@color/muted"/>
 
@@ -90,7 +90,7 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <androidx.core.widget.NestedScrollView
+        <com.fontvietlinh.viewer.PinchZoomNestedScrollView
             android:id="@+id/previewPage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -105,22 +105,44 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Gõ nội dung để thử"
+                    android:text="Mẫu chữ"
                     android:textColor="@color/ink"
                     android:textStyle="bold"
                     android:textSize="14sp" />
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/demoChips"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    app:singleSelection="true"
+                    app:selectionRequired="true">
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipDemoEnglish"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="English"
+                        android:checked="true" />
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/chipDemoVietnamesePlain"
+                        style="@style/Widget.MaterialComponents.Chip.Choice"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tiếng Việt không dấu" />
+                </com.google.android.material.chip.ChipGroup>
+
                 <EditText
                     android:id="@+id/etCustomText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="5dp"
                     android:background="@drawable/field_background"
                     android:padding="14dp"
                     android:gravity="top|start"
                     android:inputType="textMultiLine|textCapSentences"
                     android:minLines="2"
                     android:maxLines="6"
-                    android:text="@string/sample_vietnamese_text"
+                    android:text="@string/sample_english_text"
                     android:textColor="@color/ink"
                     android:textSize="15sp" />
 
@@ -142,7 +164,7 @@
                         android:id="@+id/tvFontSizeLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Cỡ chữ  30 sp"
+                        android:text="Cỡ chữ 30 sp · zoom 2 ngón"
                         android:textColor="@color/muted"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -151,8 +173,8 @@
                     android:id="@+id/sliderFontSize"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:valueFrom="14"
-                    android:valueTo="80"
+                    android:valueFrom="12"
+                    android:valueTo="160"
                     android:stepSize="1"
                     android:value="30" />
 
@@ -164,7 +186,7 @@
                     android:background="@drawable/field_background"
                     android:padding="18dp"
                     android:minHeight="220dp"
-                    android:text="@string/sample_vietnamese_text"
+                    android:text="@string/sample_english_text"
                     android:textSize="30sp"
                     android:textColor="@color/ink"
                     android:lineSpacingExtra="7dp" />
@@ -173,11 +195,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:text="Thử chữ có dấu: Đ đ Ă Ắ Ằ Â Ấ Ê Ế Ô Ố Ơ Ớ Ư Ứ"
+                    android:text="Chụm hoặc mở hai ngón tay trên vùng xem trước để thu phóng."
                     android:textColor="@color/muted"
                     android:textSize="12sp" />
             </LinearLayout>
-        </androidx.core.widget.NestedScrollView>
+        </com.fontvietlinh.viewer.PinchZoomNestedScrollView>
 
         <LinearLayout
             android:id="@+id/glyphPage"
@@ -266,11 +288,23 @@
                 </com.google.android.material.chip.ChipGroup>
             </HorizontalScrollView>
 
+            <TextView
+                android:id="@+id/tvGlyphZoomLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="18dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="3dp"
+                android:paddingBottom="6dp"
+                android:text="Lưới 4 cột · zoom bằng 2 ngón"
+                android:textColor="@color/muted"
+                android:textSize="11sp" />
+
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1">
-                <androidx.recyclerview.widget.RecyclerView
+                <com.fontvietlinh.viewer.PinchZoomRecyclerView
                     android:id="@+id/glyphGrid"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"

@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">VietLinh Font Viewer</string>
-    <string name="sample_vietnamese_text">Việt Linh — Chữ đẹp cho mọi thiết kế.\nĐ Ắ Ằ Ẳ Ẵ Ặ, Ơ Ớ Ờ Ở Ỡ Ợ, Ư Ứ Ừ Ử Ữ Ự.</string>
+    <string name="sample_english_text">Every letter tells a story.\nThe quick brown fox jumps over the lazy dog.</string>
 </resources>
